@@ -12,7 +12,7 @@ import {
   Smartphone,
   RefreshCw,
 } from "lucide-react";
-import "./SmsReports.css";
+import "./smsReports.css";
 
 // Configure your API base URL
 const API_BASE_URL =
