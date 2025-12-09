@@ -143,6 +143,8 @@ import { User, Mail, Lock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Toaster, toast } from "react-hot-toast";
 import "./SignupForm.css";
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3000";
+
 
 const SignupForm = () => {
   const navigate = useNavigate();
@@ -155,13 +157,15 @@ const SignupForm = () => {
     e.preventDefault();
     setLoading(true);
 
-    try {
-      // Replace with your actual backend URL
-      const response = await axios.post("http://localhost:3000/auth/signup", {
-        name,
-        email,
-        password,
-      });
+   try {
+  const response = await axios.post(
+    `${API_BASE}/auth/signup`,
+    {
+      name,
+      email,
+      password,
+    }
+  );
 
       console.log("Signup successful:", response.data);
 

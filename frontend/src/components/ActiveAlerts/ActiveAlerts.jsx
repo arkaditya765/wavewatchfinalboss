@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { AlertTriangle, Clock, MapPin } from "lucide-react";
 import "./ActiveAlerts.css";
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3000";
+
 
 const ActiveAlerts = () => {
   const [alertsData, setAlertsData] = useState([]);
@@ -47,7 +49,7 @@ const ActiveAlerts = () => {
     try {
       setLoading(true);
       // Replace with your actual API endpoint
-      const response = await axios.get("http://localhost:3000/alerts");
+      axios.get(`${API_BASE}/reports`)
 
       if (response.data.success) {
         const mappedAlerts = response.data.data

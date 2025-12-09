@@ -30,6 +30,11 @@ import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import "./SocialMediaAnalysis.css";
+const API_BASE_URL =
+  (import.meta.env.VITE_API_URL &&
+    import.meta.env.VITE_API_URL.replace(/\/$/, "")) ||
+  "http://localhost:3000";
+
 
 // Cache for geocoding results to avoid repeated API calls
 const geocodingCache = {};
@@ -66,18 +71,18 @@ const SocialMediaAnalysis = () => {
     try {
       setLoading(true);
       const response = await axios.get(
-        "http://localhost:3000/social-media/posts",
-        {
-          headers: {
-            "Cache-Control": "no-cache",
-            Pragma: "no-cache",
-            Expires: "0",
-          },
-          params: {
-            _t: new Date().getTime(),
-          },
-        }
-      );
+  `${API_BASE_URL}/social-media/posts`,
+  {
+    headers: {
+      "Cache-Control": "no-cache",
+      Pragma: "no-cache",
+      Expires: "0",
+    },
+    params: {
+      _t: new Date().getTime(), // prevents caching
+    },
+  }
+);
 
       const postsData = response.data.posts || response.data;
       setPosts(Array.isArray(postsData) ? postsData : []);
@@ -120,8 +125,8 @@ const SocialMediaAnalysis = () => {
 
     try {
       const response = await axios.get(
-        `http://localhost:3000/social-media/reverse-geocode?lat=${lat}&lon=${lon}`
-      );
+  `${API_BASE_URL}/social-media/reverse-geocode?lat=${lat}&lon=${lon}`
+);
 
       if (response.data.results && response.data.results.length > 0) {
         const addressComponents = response.data.results[0].address_components;

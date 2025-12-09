@@ -17,6 +17,11 @@ import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import "./SocialMediaAnalysis.css";
+const API_BASE_URL =
+  (import.meta.env.VITE_API_URL &&
+    import.meta.env.VITE_API_URL.replace(/\/$/, "")) ||
+  "http://localhost:3000";
+
 // Fix default marker icon issue
 const icon = L.icon({
   iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
@@ -46,18 +51,19 @@ const SocialMediaAnalysis = () => {
     try {
       setLoading(true);
       const response = await axios.get(
-        "http://localhost:3000/social-media/posts",
-        {
-          headers: {
-            "Cache-Control": "no-cache",
-            Pragma: "no-cache",
-            Expires: "0",
-          },
-          params: {
-            _t: new Date().getTime(),
-          },
-        }
-      );
+  `${API_BASE_URL}/social-media/posts`,
+  {
+    headers: {
+      "Cache-Control": "no-cache",
+      Pragma: "no-cache",
+      Expires: "0",
+    },
+    params: {
+      _t: new Date().getTime(), // cache buster
+    },
+  }
+);
+
 
       const postsData = response.data.posts || response.data;
       setPosts(Array.isArray(postsData) ? postsData : []);

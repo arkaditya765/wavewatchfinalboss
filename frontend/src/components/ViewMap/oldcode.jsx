@@ -25,6 +25,11 @@ import "./ViewMap.css";
 
 // Import for the social-media image marker
 import redditMarker from "/src/assets/marker.png";
+const API_BASE_URL =
+  (import.meta.env.VITE_API_URL &&
+    import.meta.env.VITE_API_URL.replace(/\/$/, "")) ||
+  "http://localhost:3000";
+
 
 // Fix for default markers in Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -265,13 +270,14 @@ const ViewMap = () => {
       }
 
       const queryString = params.toString();
-      const reportsUrl = `http://localhost:3000/reports${
-        queryString ? `?${queryString}` : ""
-      }`;
+      const reportsUrl = `${API_BASE_URL}/reports${
+  queryString ? `?${queryString}` : ""
+}`;
+
 
       const [reportsResponse, socialMediaResponse] = await Promise.all([
         axios.get(reportsUrl),
-        axios.get("http://localhost:3000/social-media/posts"),
+axios.get(`${API_BASE_URL}/social-media/posts`),
       ]);
 
       setReports(reportsResponse.data.reports || []);

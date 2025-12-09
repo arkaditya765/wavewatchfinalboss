@@ -137,6 +137,8 @@ import { Mail, Lock, AlertCircle, UserCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./LoginForm.css";
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3000";
+
 
 const LoginForm = () => {
   const navigate = useNavigate();
@@ -152,11 +154,13 @@ const LoginForm = () => {
     setError("");
 
     try {
-      // Replace with your actual backend URL
-      const response = await axios.post("http://localhost:3000/auth/login", {
-        email,
-        password,
-      });
+  const response = await axios.post(
+    `${API_BASE}/auth/login`,
+    {
+      email,
+      password,
+    }
+  );
 
       // NEW: Check if the logged-in user's role matches the selected role
       if (response.data.user.role !== role) {

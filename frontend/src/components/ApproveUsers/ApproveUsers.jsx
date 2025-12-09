@@ -14,6 +14,8 @@ import {
   Search,
 } from "lucide-react";
 import axios from "axios";
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3000";
+
 
 const ApproveUsers = () => {
   const [users, setUsers] = useState([]);
@@ -33,15 +35,16 @@ const ApproveUsers = () => {
     setError("");
 
     try {
-      const token = localStorage.getItem("token");
-      const response = await axios.get(
-        `http://localhost:3000/auth/users?status=${filter}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+  const token = localStorage.getItem("token");
+
+  const response = await axios.get(
+    `${API_BASE}/auth/users?status=${filter}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
 
       setUsers(response.data.users || []);
     } catch (err) {
@@ -64,17 +67,17 @@ const ApproveUsers = () => {
     setSuccess("");
 
     try {
-      const token = localStorage.getItem("token");
-      await axios.patch(
-        `http://localhost:3000/auth/approve-user/${userId}`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+  const token = localStorage.getItem("token");
 
+  await axios.patch(
+    `${API_BASE}/auth/approve-user/${userId}`,
+    {}, // request body (empty object)
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
       setSuccess(`${userName} has been approved successfully!`);
       fetchUsers(); // Refresh the list
     } catch (err) {
@@ -97,16 +100,17 @@ const ApproveUsers = () => {
     setSuccess("");
 
     try {
-      const token = localStorage.getItem("token");
-      await axios.patch(
-        `http://localhost:3000/auth/reject-user/${userId}`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+  const token = localStorage.getItem("token");
+
+  await axios.patch(
+    `${API_BASE}/auth/reject-user/${userId}`,
+    {},
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
 
       setSuccess(`${userName} has been rejected.`);
       fetchUsers(); // Refresh the list

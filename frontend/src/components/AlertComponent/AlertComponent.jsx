@@ -530,7 +530,8 @@ const AlertComponent = () => {
     description: "",
   });
 
-  const API_BASE_URL = "http://localhost:3000/alerts";
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3000";
+const API_BASE_URL = `${API_BASE.replace(/\/$/, "")}/alerts`;
 
   // Auto-hide messages after 3 seconds
   useEffect(() => {

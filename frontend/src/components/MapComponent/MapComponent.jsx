@@ -3,6 +3,8 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import axios from "axios";
 import "./MapComponent.css";
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3000";
+
 
 // Fix for default markers in Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -31,20 +33,25 @@ const MapComponent = () => {
   };
 
   // Fetch reports from API
-  const fetchReports = async () => {
-    try {
-      setLoading(true);
-      // Replace with your actual API endpoint
-      const response = await axios.get("http://localhost:3000/reports");
-      setReports(response.data.reports || []);
-      setError(null);
-    } catch (err) {
-      console.error("Error fetching reports:", err);
-      setError("Failed to fetch reports");
-    } finally {
-      setLoading(false);
-    }
-  };
+const fetchReports = async () => {
+  try {
+    setLoading(true);
+
+    const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3000";
+
+    const response = await axios.get(`${API_BASE}/reports`);
+    setReports(response.data.reports || []);
+    setError(null);
+
+  } catch (err) {
+    console.error("Error fetching reports:", err);
+    setError("Failed to fetch reports");
+  } finally {
+    setLoading(false);
+  }
+};
+
+  
 
   // Initialize map
   useEffect(() => {
@@ -160,5 +167,4 @@ const MapComponent = () => {
     </div>
   );
 };
-
 export default MapComponent;

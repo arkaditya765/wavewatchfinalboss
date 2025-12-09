@@ -71,6 +71,11 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { FileText, Waves, Mountain, Zap } from "lucide-react";
 import "./StatsCards.css";
+const API_BASE_URL =
+  (import.meta.env.VITE_API_URL &&
+    import.meta.env.VITE_API_URL.replace(/\/$/, "")) ||
+  "http://localhost:3000";
+
 
 const StatsCards = () => {
   const [statsData, setStatsData] = useState([
@@ -185,7 +190,7 @@ const StatsCards = () => {
     try {
       setLoading(true);
 
-      const response = await axios.get("http://localhost:3000/reports");
+      const response = await axios.get(`${API_BASE_URL}/reports`);
 
       if (response.data.reports) {
         const calculatedStats = calculateStats(response.data.reports);

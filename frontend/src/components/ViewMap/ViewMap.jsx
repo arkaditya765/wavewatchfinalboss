@@ -195,118 +195,133 @@ const ViewMap = () => {
   };
 
   // Fetch reports from API
-  const fetchReports = async () => {
-    try {
-      setLoading(true);
+const fetchReports = async () => {
+  try {
+    setLoading(true);
 
-      // Build query parameters from advanced filters
-      const params = new URLSearchParams();
+    // Build query parameters from advanced filters
+    const params = new URLSearchParams();
 
-      // Time filters - handle quick time
-      let startDate = advancedFilters.startDate;
-      let endDate = advancedFilters.endDate;
+    // Time filters - handle quick time
+    let startDate = advancedFilters.startDate;
+    let endDate = advancedFilters.endDate;
 
-      if (advancedFilters.quickTime) {
-        const now = new Date();
-        switch (advancedFilters.quickTime) {
-          case "1h":
-            startDate = new Date(now.getTime() - 60 * 60 * 1000).toISOString();
-            break;
-          case "24h":
-            startDate = new Date(
-              now.getTime() - 24 * 60 * 60 * 1000
-            ).toISOString();
-            break;
-          case "7d":
-            startDate = new Date(
-              now.getTime() - 7 * 24 * 60 * 60 * 1000
-            ).toISOString();
-            break;
-          case "30d":
-            startDate = new Date(
-              now.getTime() - 30 * 24 * 60 * 60 * 1000
-            ).toISOString();
-            break;
-        }
-        endDate = now.toISOString();
+    if (advancedFilters.quickTime) {
+      const now = new Date();
+      switch (advancedFilters.quickTime) {
+        case "1h":
+          startDate = new Date(now.getTime() - 60 * 60 * 1000).toISOString();
+          break;
+        case "24h":
+          startDate = new Date(
+            now.getTime() - 24 * 60 * 60 * 1000
+          ).toISOString();
+          break;
+        case "7d":
+          startDate = new Date(
+            now.getTime() - 7 * 24 * 60 * 60 * 1000
+          ).toISOString();
+          break;
+        case "30d":
+          startDate = new Date(
+            now.getTime() - 30 * 24 * 60 * 60 * 1000
+          ).toISOString();
+          break;
       }
-
-      if (startDate) {
-        params.append("startDate", startDate);
-      }
-      if (endDate) {
-        params.append("endDate", endDate);
-      }
-
-      // Location filters
-      if (advancedFilters.state) {
-        params.append("state", advancedFilters.state);
-      }
-      if (advancedFilters.district) {
-        params.append("district", advancedFilters.district);
-      }
-
-      // Report type filters
-      if (advancedFilters.reportTypes.length > 0) {
-        params.append("type", advancedFilters.reportTypes.join(","));
-      }
-
-      // Urgency filters
-      if (advancedFilters.urgencyLevels.length > 0) {
-        params.append("urgency", advancedFilters.urgencyLevels.join(","));
-      }
-
-      // Verification status filters
-      if (advancedFilters.verificationStatus.length > 0) {
-        params.append(
-          "verificationStatus",
-          advancedFilters.verificationStatus.join(",")
-        );
-      }
-
-      const queryString = params.toString();
-      const reportsUrl = `http://localhost:3000/reports${
-        queryString ? `?${queryString}` : ""
-      }`;
-
-      const [reportsResponse, socialMediaResponse] = await Promise.all([
-        axios.get(reportsUrl),
-        axios.get("http://localhost:3000/social-media/posts"),
-      ]);
-
-      setReports(reportsResponse.data.reports || []);
-      setSocialMediaPosts(socialMediaResponse.data.posts || []);
-      setError(null);
-    } catch (err) {
-      console.error("Error fetching data:", err);
-      setError("Failed to fetch data");
-    } finally {
-      setLoading(false);
+      endDate = now.toISOString();
     }
-  };
 
-  // Calculate distance between two lat/lng points (in kilometers)
-  const calculateDistance = (lat1, lon1, lat2, lon2) => {
-    const R = 6371;
-    const dLat = ((lat2 - lat1) * Math.PI) / 180;
-    const dLon = ((lon2 - lon1) * Math.PI) / 180;
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos((lat1 * Math.PI) / 180) *
-        Math.cos((lat2 * Math.PI) / 180) *
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c;
-  };
+    if (startDate) {
+      params.append("startDate", startDate);
+    }
+    if (endDate) {
+      params.append("endDate", endDate);
+    }
 
-  // Generate hotspots using DBSCAN for reports
-  const generateReportHotspots = (filteredReports) => {
-    if (filteredReports.length < 3) return [];
+    // Location filters
+    if (advancedFilters.state) {
+      params.append("state", advancedFilters.state);
+    }
+    if (advancedFilters.district) {
+      params.append("district", advancedFilters.district);
+    }
 
-    const points = filteredReports.map((report) => {
-      const [lng, lat] = report.location.coordinates;
-      return [lat, lng];
+    // Report type filters
+    if (advancedFilters.reportTypes.length > 0) {
+      params.append("type", advancedFilters.reportTypes.join(","));
+    }
+
+    // Urgency filters
+    if (advancedFilters.urgencyLevels.length > 0) {
+      params.append("urgency", advancedFilters.urgencyLevels.join(","));
+    }
+
+    // Verification status filters
+    if (advancedFilters.verificationStatus.length > 0) {
+      params.append(
+        "verificationStatus",
+        advancedFilters.verificationStatus.join(",")
+      );
+    }
+
+    // safe per-file base URL
+    const API_BASE_URL =
+      (import.meta.env.VITE_API_URL &&
+        import.meta.env.VITE_API_URL.replace(/\/$/, "")) ||
+      "http://localhost:3000";
+
+    const queryString = params.toString();
+
+    // build reports URL before Promise.all
+    const reportsUrl = `${API_BASE_URL}/reports${queryString ? `?${queryString}` : ""}`;
+
+    const [reportsResponse, socialMediaResponse] = await Promise.all([
+      axios.get(reportsUrl),
+      axios.get(`${API_BASE_URL}/social-media/posts`, {
+        headers: {
+          "Cache-Control": "no-cache",
+          Pragma: "no-cache",
+          Expires: "0",
+        },
+        params: {
+          _t: new Date().getTime(), // cache buster
+        },
+      }),
+    ]);
+
+    setReports(reportsResponse.data.reports || []);
+    setSocialMediaPosts(socialMediaResponse.data.posts || []);
+    setError(null);
+  } catch (err) {
+    console.error("Error fetching data:", err);
+    setError("Failed to fetch data");
+  } finally {
+    setLoading(false);
+  }
+};
+
+// Calculate distance between two lat/lng points (in kilometers)
+    const calculateDistance = (lat1, lon1, lat2, lon2) => {
+      const R = 6371;
+      const dLat = ((lat2 - lat1) * Math.PI) / 180;
+      const dLon = ((lon2 - lon1) * Math.PI) / 180;
+      const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos((lat1 * Math.PI) / 180) *
+          Math.cos((lat2 * Math.PI) / 180) *
+          Math.sin(dLon / 2) *
+          Math.sin(dLon / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return R * c;
+    };
+
+    // Generate hotspots using DBSCAN for reports
+    const generateReportHotspots = (filteredReports) => {
+      if (filteredReports.length < 3) return [];
+
+      const points = filteredReports.map((report) => {
+        const [lng, lat] = report.location.coordinates;
+        return [lat, lng];
     });
 
     const distanceFunction = (pointA, pointB) => {
@@ -1506,6 +1521,6 @@ const ViewMap = () => {
       )}
     </div>
   );
-};
+};  
 
 export default ViewMap;
